@@ -10,6 +10,18 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
+```{r}
+library(ggplot2)
+library(tidycensus)
+library(tigris)
+library(sf)
+library(units)
+library(ggspatial)
+library(ggthemes)
+```
+
 # Introduction
 
 Honolulu is the capital city of the state of Hawaii. The city’s name means ‘sheltered bay’ in the Hawaiian language and today is home to over 390,000 people. The urban city of Honolulu extends about 10 miles along the southeastern shore of Oahu and four miles inland into the foothills of the Koolau Range. The city-county comprises all of Oahu and some outlying islets, which have an aggregate land area of only three square miles but extend for more than 1,300 miles when accounting for ocean.  
@@ -30,55 +42,12 @@ Understanding the demographics and economies of the city will help us form assum
 
 When looking at Honolulu and the greater island of Oahu, we made some interesting observations related to transportation. Firstly, city growth is heavily constrained by surrounding geography. The island is made up of two major mountain ranges hosting several extinct volcanoes: The Waiʻanae range to the west, and Koʻolau range to the east. These mountain ranges cause most of the island to be unfit for development due to the steep terrain. A map of streets on Oahu reveals that there are very few connections through or over the mountain ranges. Sandwiched between the coastline and the mountains, Honolulu has little room for growth and must maximize infrastructure investments.
 
-```{r}
-library(ggplot2)
-library(tidycensus)
-library(tigris)
-```
-
 
 # Household Characteristics (2021 ACS, 5-year sample)
+
 ## Total Number of Households
 
 ```{r}
 
 ```
 
-
-
-
-Here are two maps of Boston. I might include some text here about this set of maps.
-
-## Interactive Map
-This interactive map demonstrates the following skills: 
-
-* Displaying data on an interactive map
-
-[![](thumbnails/Boston_interactive.png)](https://c-voulgaris.github.io/portfolio_examples/fullsize/inter_black.html){target="_blank"}
-
-## Clockboard Map
-This map demonstrates the following skills:
-
-* Aggregating point data to a layer of polygons
-
-[![](thumbnails/clockboard.jpg)](https://c-voulgaris.github.io/portfolio_examples/fullsize/clockboard.pdf){target="_blank"}
-
-# Maps of San Luis Obispo
-Here are two maps of San Luis Obispo, California. I might include some text here as well.
-
-## Isochrones
-This map shows isochrones based on transit travel times to the nearest school. It demonstrates the following skills:
-
-* Displaying multiple vector layers on the same map
-* Calculating and displaying accessibility, based on travel time
-
-[![](thumbnails/SLO_isochrone.png)](https://c-voulgaris.github.io/portfolio_examples/fullsize/SLO_schools.pdf){target="_blank"}
-
-## Accessibility
-This map shows accessibility based on a distance-decay function of the walking time to the nearest transit stop. It demonstrates the following skills:
-
-* Displaying multiple vector layers on the same map
-* Calculating and displaying accessibility, based on travel time
-* Displaying raster data on a map
-
-[![](thumbnails/SLO_raster.png)](https://c-voulgaris.github.io/portfolio_examples/fullsize/SLO_transit.pdf){target="_blank"}
