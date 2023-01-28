@@ -91,3 +91,7 @@ lehd_tracts <- lehd_blocks %>%
   summarize(across(everything(), ~sum(.)))
 ```
 
+```{r}
+tracts_original <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_(2010).geojson')
+```
+
