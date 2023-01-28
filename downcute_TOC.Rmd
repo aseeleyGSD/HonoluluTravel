@@ -1,7 +1,7 @@
 ---
-title: "Example Portfolio"
-author: "Carole Voulgaris"
-date: "10/12/2021"
+title: "Zonal Statistics"
+author: "Alicia, JT, Marina"
+date: "01/28/2023"
 output: 
   rmdformats::downcute
 ---
@@ -12,24 +12,41 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-This is an example of a portfolio that someone might assemble to demonstrate the skills they have developed in VIS 2128. I have created this page using RMarkdown. There are fancier tools out there for creating and hosting webpages, and you are welcome to use any of those if you like. The advantage of this approach is that you can create your webpage directly from RStudio.
+Honolulu is the capital city of the state of Hawaii. The city’s name means ‘sheltered bay’ in the Hawaiian language and today is home to over 390,000 people. The urban city of Honolulu extends about 10 miles along the southeastern shore of Oahu and four miles inland into the foothills of the Koolau Range. The city-county comprises all of Oahu and some outlying islets, which have an aggregate land area of only three square miles but extend for more than 1,300 miles when accounting for ocean.  
 
-This example uses the `downcute` theme, which is available if you install the `rmdformats` package. The themes in the `rmdformats` have a table of contents that only includes level-one headings.
+Some fun facts about the city include: 
 
-Other themes in the `rmdformats` package are `material`, `html_clean`, `html_docco`, `readthedown`, and `robobook`.  
+Barack Obama was born in Honolulu 
 
-Your portfolio should demonstrate each of the following skills (not all of which are demonstrated in this example):
+Honolulu is home to the only royal palace in the US 
 
-* Displaying multiple vector layers on the same map
-* Calculating and displaying relationships among point and polygon layers based on distance
-* Aggregating point data to a layer of polygons
-* Calculating and displaying accessibility, based on travel time
-* Converting between raster layers and vector layers
-* Displaying raster data on a map
-* Georeferencing a raster image
-* Displaying data on an interactive map
+Honolulu sees 90 days of rain per year 
 
-# Maps of Boston
+One of the deadliest attacks on the US (Pearl Harbor) took place in Honolulu 
+
+It is one of the most expensive places to live in the US 
+
+Understanding the demographics and economies of the city will help us form assumptions about travel behavior as we construct our model. According to the US Census Bureau, 21% of Honolulu’s population is under the age of 18, and 18% are over 65. The average household size is 2.96. The racial makeup of the city is 21.3% White, 2.7% Black, 42.1% Asian, 10% Native Hawaiian or other Pacific Islander, 10% Hispanic or Latino, and 23% identifying as two or more races. The median household income is $92,600. Key industries are international trade logistics (given its location between the East and West), military defense (for the same geographical reason), research and development, and manufacturing.1 
+
+When looking at Honolulu and the greater island of Oahu, we made some interesting observations related to transportation. Firstly, city growth is heavily constrained by surrounding geography. The island is made up of two major mountain ranges hosting several extinct volcanoes: The Waiʻanae range to the west, and Koʻolau range to the east. These mountain ranges cause most of the island to be unfit for development due to the steep terrain. A map of streets on Oahu reveals that there are very few connections through or over the mountain ranges. Sandwiched between the coastline and the mountains, Honolulu has little room for growth and must maximize infrastructure investments.
+
+```{r}
+library(ggplot2)
+library(tidycensus)
+library(tigris)
+```
+
+
+# Household Characteristics (2021 ACS, 5-year sample)
+## Total Number of Households
+
+```{r}
+
+```
+
+
+
+
 Here are two maps of Boston. I might include some text here about this set of maps.
 
 ## Interactive Map
