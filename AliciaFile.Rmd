@@ -21,6 +21,7 @@ library(units)
 library(ggspatial)
 library(ggthemes)
 library(tidyverse)
+library(dplyr)
 ```
 
 
@@ -93,5 +94,15 @@ lehd_tracts <- lehd_blocks %>%
 
 ```{r}
 tracts_original <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_(2010).geojson')
+```
+```{r}
+tracts_land_area <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_2010_Land_KM.geojson')
+```
+```{r}
+lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOID10'))
+```
+
+```{r}
+lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
 ```
 
