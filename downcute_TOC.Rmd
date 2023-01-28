@@ -20,6 +20,7 @@ library(sf)
 library(units)
 library(ggspatial)
 library(ggthemes)
+library(tidyverse)
 ```
 
 
@@ -69,4 +70,16 @@ household <- get_acs(geography = "tract", county = "Honolulu", state = "HI",
 ```{r}
 
 ```
+
+##Workforce Area Statistics
+
+```{r}
+lehd_blocks <- read_csv('https://lehd.ces.census.gov/data/lodes/LODES7/hi/wac/hi_wac_S000_JT00_2019.csv.gz', show_col_types = FALSE) %>%
+  rename(total_emp = C000) %>%
+  mutate(basic_emp = CNS01+CNS02+CNS03+CNS04+CNS05+CNS06+CNS08+CNS09) %>%
+  rename(retail_emp = CNS07) %>%
+  mutate(service_emp = total_emp - basic_emp - retail_emp) %>%
+  select(w_geocode, total_emp, basic_emp, retail_emp, service_emp)
+```
+
 
