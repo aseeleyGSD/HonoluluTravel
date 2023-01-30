@@ -22,6 +22,11 @@ library(ggspatial)
 library(ggthemes)
 library(tidyverse)
 library(dplyr)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(ggalt)
+library(viridis)
 ```
 
 
@@ -58,7 +63,7 @@ acs_vars <- load_variables(2021, "acs5")
 ```{r}
 household <- get_acs(geography = "tract", county = "Honolulu", state = "HI", 
                            year = 2021, survey = "acs5",
-                           variables = c(tot = "B11012_001", vehicles = "B08201_002", ),
+                           variables = c(tot = "B11012_001", vehicles = "B08201_002", lives_alone = "B09021_002", w_spouse                            = "B09021_003", w_partner = "B09021_004", num_children = "B09021_005", young_alone = "B09021_009", young_married = "B09021_010", young_partner = "B09021_011", young_kids = "B09021_012", mid_alone = "B09021_016", mid_married = "B09021_017", mid_partner = "B09021_018", mid_kids = "B09021_019", old_alone = "B09021_023", old_married = "B09021_024", old_partner = "B09021_025", old_kids = "B09021_026", income =  "B28004_001", size_1 = "B11016_010", size_2 = "B11016_011", size_3 = "B11016_012", size_4 = "B11016_013", size_5 = "B11016_014", size_6 = "B11016_015", size_7more = "B11016_016", avg_size = "B25010_001"),
                            output = "wide", geometry = TRUE) 
 ```
 
@@ -104,5 +109,32 @@ lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOI
 
 ```{r}
 lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
+```
+
+```{r}
+hh_data <- household[-149,]
+```
+
+
+```{r}
+Hi_state_plane <- "+proj=tmerc +lat_0=21.66666666666667 +lon_0=-160.1666666666667 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+```
+
+```{r}
+hh_data <- hh_data %>%
+  st_transform(Hi_state_plane)
+```
+
+
+```{r}
+hh_total_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = totE)) +
+  scale_fill_viridis_c(name = "Honolulu Census Tracts by Number of Households",
+                       breaks = breaks <- seq(0, 3000, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+hh_total_map
 ```
 
