@@ -237,6 +237,11 @@ employee_map
 ```
 
 ```{r}
+hist_retail <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = retail_emp),
+                 fill = "purple",
+                 color = "thistle4")
 
+hist_retail
 ```
 
