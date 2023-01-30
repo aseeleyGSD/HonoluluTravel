@@ -97,14 +97,14 @@ lehd_tracts <- lehd_blocks %>%
 tracts_original <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_(2010).geojson')
 ```
 ```{r}
-tracts_land_area <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_2010_Land_KM.geojson')
+tracts_KM <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Tracts_KM.geojson')
 ```
 ```{r}
-lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOID10'))
+lehd_tracts_join <- inner_join(lehd_tracts, tracts_KM, by=c('GEOID'='GEOID10'))
 ```
 
 ```{r}
-lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
+lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_KM
 ```
 
 ```{r}
@@ -161,43 +161,37 @@ income_map
 
 ```{r}
 #household size
-#create histograms
 
-hist01 <- ggplot(hh_data) +
-  geom_histogram(aes(x = size_1E),
-                 fill = "sienna2",
-                 color = "thistle4")
+hh_size_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = avg_sizeE)) +
+  scale_fill_viridis_c(name = "Census Tracts by Average Household Size",
+                       breaks = breaks <- seq(0, 5, by = 1),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "people"))
 
-hist02 <- ggplot(hh_data) +
-  geom_histogram(aes(x = size_2E),
-                 fill = "cadetblue2",
-                 color = "thistle4")
-
-hist03 <- ggplot(hh_data) +
-  geom_histogram(aes(x = size_3E),
-                 fill = "white",
-                 color = "thistle4")
-
-hist04 <- ggplot(hh_data) +
-  geom_histogram(aes(x = size_4E),
-                 fill = "burlywood1",
-                 color = "thistle4")
-
-hist05 <- ggplot(hh_data) +
-  geom_histogram(aes(x = size_5E),
-                 fill = "palegreen2",
-                 color = "thistle4")
-
-hist01
-hist02
-hist03
-hist04
-hist05
+hh_size_map
 
 
 ```
 
 ```{r}
 #structure
+hh_data$with_kids <- hh_data$young_kidsE + hh_data$mid_kidsE + hh_data$old_kidsE
+```
+
+```{r}
+#structure maps
+
+kids_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = with_kids)) +
+  scale_fill_viridis_c(name = "Number of Households with Kids",
+                       breaks = breaks <- seq(0, 1200, by = 100),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+kids_map
+
 ```
 
