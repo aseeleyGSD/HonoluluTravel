@@ -1,0 +1,84 @@
+---
+title: "Zonal Statistics"
+author: "Alicia, JT, Marina"
+date: "01/28/2023"
+output: 
+  rmdformats::downcute
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(ggplot2)
+library(tidycensus)
+library(tigris)
+library(sf)
+library(units)
+library(ggspatial)
+library(ggthemes)
+```
+
+
+# Introduction
+
+Honolulu is the capital city of the state of Hawaii. The city’s name means ‘sheltered bay’ in the Hawaiian language and today is home to over 390,000 people. The urban city of Honolulu extends about 10 miles along the southeastern shore of Oahu and four miles inland into the foothills of the Koolau Range. The city-county comprises all of Oahu and some outlying islets, which have an aggregate land area of only three square miles but extend for more than 1,300 miles when accounting for ocean.  
+
+Some fun facts about the city include: 
+
+Barack Obama was born in Honolulu 
+
+Honolulu is home to the only royal palace in the US 
+
+Honolulu sees 90 days of rain per year 
+
+One of the deadliest attacks on the US (Pearl Harbor) took place in Honolulu 
+
+It is one of the most expensive places to live in the US 
+
+Understanding the demographics and economies of the city will help us form assumptions about travel behavior as we construct our model. According to the US Census Bureau, 21% of Honolulu’s population is under the age of 18, and 18% are over 65. The average household size is 2.96. The racial makeup of the city is 21.3% White, 2.7% Black, 42.1% Asian, 10% Native Hawaiian or other Pacific Islander, 10% Hispanic or Latino, and 23% identifying as two or more races. The median household income is $92,600. Key industries are international trade logistics (given its location between the East and West), military defense (for the same geographical reason), research and development, and manufacturing.1 
+
+When looking at Honolulu and the greater island of Oahu, we made some interesting observations related to transportation. Firstly, city growth is heavily constrained by surrounding geography. The island is made up of two major mountain ranges hosting several extinct volcanoes: The Waiʻanae range to the west, and Koʻolau range to the east. These mountain ranges cause most of the island to be unfit for development due to the steep terrain. A map of streets on Oahu reveals that there are very few connections through or over the mountain ranges. Sandwiched between the coastline and the mountains, Honolulu has little room for growth and must maximize infrastructure investments.
+
+## Data gathering
+
+### get ACS household data variables
+
+```{r}
+acs_vars <- load_variables(2021, "acs5")
+```
+
+### get ACS household characteristics
+
+```{r}
+household <- get_acs(geography = "tract", county = "Honolulu", state = "HI", 
+                           year = 2021, survey = "acs5",
+                           variables = c(tot = "B11012_001", vehicles = "B08201_002", lives_alone = "B09021_002", w_spouse                            = "B09021_003", w_partner = "B09021_004", num_children = "B09021_005", young_alone = "B09021_009", young_married = "B09021_010", young_partner = "B09021_011", young_kids = "B09021_012", mid_alone = "B09021_016", mid_married = "B09021_017", mid_partner = "B09021_018", mid_kids = "B09021_019", old_alone = "B09021_023", old_married = "B09021_024", old_partner = "B09021_025", old_kids = "B09021_026", income =  "B28004_001", size_1 = "B11016_010", size_2 = "B11016_011", size_3 = "B11016_012", size_4 = "B11016_013", size_5 = "B11016_014", size_6 = "B11016_015", size_7more = "B11016_016" ),
+                           output = "wide", geometry = TRUE) 
+```
+
+
+# Household Characteristics (2021 ACS, 5-year sample)
+
+## Total Number of Households
+
+
+```{r}
+
+```
+
+##Workforce Area Statistics
+
+```{r}
+lehd_blocks <- read_csv('https://lehd.ces.census.gov/data/lodes/LODES7/hi/wac/hi_wac_S000_JT00_2019.csv.gz', show_col_types = FALSE) %>%
+  rename(total_emp = C000) %>%
+  mutate(basic_emp = CNS01+CNS02+CNS03+CNS04+CNS05+CNS06+CNS08+CNS09) %>%
+  rename(retail_emp = CNS07) %>%
+  mutate(service_emp = total_emp - basic_emp - retail_emp) %>%
+  select(w_geocode, total_emp, basic_emp, retail_emp, service_emp)
+```
+
+
