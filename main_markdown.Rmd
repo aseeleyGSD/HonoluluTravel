@@ -99,5 +99,5 @@ lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOI
 ```{r message=FALSE, warning=FALSE, results='hide'}
 lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
 ```
-
+im trying
 # Density
