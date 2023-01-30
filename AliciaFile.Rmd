@@ -94,10 +94,10 @@ lehd_tracts <- lehd_blocks %>%
 ```
 
 ```{r}
-tracts_original <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Census_Tracts_(2010).geojson')
+tracts_original <- st_read('C:/Users/jtkel/OneDrive/MUP/MUP_Obsidian/SPRING 2023 COURSES/FORECASTING/HonoluluTravel/Census_Tracts_(2010).geojson')
 ```
 ```{r}
-tracts_KM <- st_read('~/GSD23/Forecasting/Github/HonoluluTravel/Tracts_KM.geojson')
+tracts_KM <- st_read('C:/Users/jtkel/OneDrive/MUP/MUP_Obsidian/SPRING 2023 COURSES/FORECASTING/HonoluluTravel/Tracts_KM.geojson')
 ```
 ```{r}
 lehd_tracts_join <- inner_join(lehd_tracts, tracts_KM, by=c('GEOID'='GEOID10'))
@@ -193,7 +193,7 @@ kids_map <- ggplot(hh_data) +
 
 kids_map
 
-2
+
 alone_map <- ggplot(hh_data) +
   geom_sf(color = NA, 
           aes(fill = lives_aloneE)) +
@@ -217,6 +217,22 @@ spouse_map
 ```
 
 ```{r}
+lehd_tracts_join <- lehd_tracts_join %>% 
+  st_sf(sf_column_name = 'geometry')
+```
 
+
+```{r}
+#employees
+
+employee_map <- ggplot(lehd_tracts_join) +
+  geom_sf(color = NA, 
+          aes(fill = total_emp)) +
+  scale_fill_viridis_c(name = "Total number of employees",
+                       breaks = breaks <- seq(10000, 40000, by = 3000),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "employees"))
+
+employee_map
 ```
 
