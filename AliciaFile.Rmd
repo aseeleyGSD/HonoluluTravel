@@ -165,12 +165,12 @@ income_map
 
 hist01 <- ggplot(hh_data) +
   geom_histogram(aes(x = size_1E),
-                 fill = "coral",
+                 fill = "sienna2",
                  color = "thistle4")
 
 hist02 <- ggplot(hh_data) +
   geom_histogram(aes(x = size_2E),
-                 fill = "blue",
+                 fill = "cadetblue2",
                  color = "thistle4")
 
 hist03 <- ggplot(hh_data) +
@@ -180,12 +180,12 @@ hist03 <- ggplot(hh_data) +
 
 hist04 <- ggplot(hh_data) +
   geom_histogram(aes(x = size_4E),
-                 fill = "red",
+                 fill = "burlywood1",
                  color = "thistle4")
 
 hist05 <- ggplot(hh_data) +
   geom_histogram(aes(x = size_5E),
-                 fill = "green",
+                 fill = "palegreen2",
                  color = "thistle4")
 
 hist01
