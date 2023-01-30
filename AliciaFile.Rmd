@@ -193,5 +193,26 @@ kids_map <- ggplot(hh_data) +
 
 kids_map
 
+2
+alone_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = lives_aloneE)) +
+  scale_fill_viridis_c(name = "Number of Households Living Alone",
+                       breaks = breaks <- seq(0, 1200, by = 100),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+alone_map
+
+
+spouse_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = w_spouseE)) +
+  scale_fill_viridis_c(name = "Number of Households Living with Spouse",
+                       breaks = breaks <- seq(0, 4700, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+spouse_map
+
 ```
 
