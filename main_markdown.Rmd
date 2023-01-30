@@ -111,6 +111,8 @@ hh_data <- hh_data %>%
 
 # Household Characteristics (2021 ACS, 5-year sample)
 
+djd 
+
 ## Total Number of Households
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
