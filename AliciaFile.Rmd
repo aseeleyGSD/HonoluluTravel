@@ -161,15 +161,40 @@ income_map
 
 ```{r}
 #household size
-hh_size_map <- ggplot(hh_data) +
-  geom_sf(color = NA, 
-          aes(fill = totE)) +
-  scale_fill_viridis_c(name = "Honolulu Census Tracts by Number of Households",
-                       breaks = breaks <- seq(0, 3000, by = 500),
-                       labels = paste(prettyNum(breaks, big.mark = ","),
-                                      "households"))
+#create histograms
 
-hh_size_map
+hist01 <- ggplot(hh_data) +
+  geom_histogram(aes(x = size_1E),
+                 fill = "coral",
+                 color = "thistle4")
+
+hist02 <- ggplot(hh_data) +
+  geom_histogram(aes(x = size_2E),
+                 fill = "blue",
+                 color = "thistle4")
+
+hist03 <- ggplot(hh_data) +
+  geom_histogram(aes(x = size_3E),
+                 fill = "white",
+                 color = "thistle4")
+
+hist04 <- ggplot(hh_data) +
+  geom_histogram(aes(x = size_4E),
+                 fill = "red",
+                 color = "thistle4")
+
+hist05 <- ggplot(hh_data) +
+  geom_histogram(aes(x = size_5E),
+                 fill = "green",
+                 color = "thistle4")
+
+hist01
+hist02
+hist03
+hist04
+hist05
+
+
 ```
 
 ```{r}
