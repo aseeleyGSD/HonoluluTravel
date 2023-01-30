@@ -63,7 +63,7 @@ acs_vars <- load_variables(2021, "acs5")
 ```{r}
 household <- get_acs(geography = "tract", county = "Honolulu", state = "HI", 
                            year = 2021, survey = "acs5",
-                           variables = c(tot = "B11012_001", vehicles = "B08201_002", lives_alone = "B09021_002", w_spouse                            = "B09021_003", w_partner = "B09021_004", num_children = "B09021_005", young_alone = "B09021_009", young_married = "B09021_010", young_partner = "B09021_011", young_kids = "B09021_012", mid_alone = "B09021_016", mid_married = "B09021_017", mid_partner = "B09021_018", mid_kids = "B09021_019", old_alone = "B09021_023", old_married = "B09021_024", old_partner = "B09021_025", old_kids = "B09021_026", income =  "B28004_001", size_1 = "B11016_010", size_2 = "B11016_011", size_3 = "B11016_012", size_4 = "B11016_013", size_5 = "B11016_014", size_6 = "B11016_015", size_7more = "B11016_016", avg_size = "B25010_001"),
+                           variables = c(tot = "B11012_001", vehicles = "B08141_001", lives_alone = "B09021_002", w_spouse                            = "B09021_003", w_partner = "B09021_004", num_children = "B09021_005", young_alone = "B09021_009", young_married = "B09021_010", young_partner = "B09021_011", young_kids = "B09021_012", mid_alone = "B09021_016", mid_married = "B09021_017", mid_partner = "B09021_018", mid_kids = "B09021_019", old_alone = "B09021_023", old_married = "B09021_024", old_partner = "B09021_025", old_kids = "B09021_026", income =  "B28004_001", size_1 = "B11016_010", size_2 = "B11016_011", size_3 = "B11016_012", size_4 = "B11016_013", size_5 = "B11016_014", size_6 = "B11016_015", size_7more = "B11016_016", avg_size = "B25010_001"),
                            output = "wide", geometry = TRUE) 
 ```
 
@@ -72,10 +72,6 @@ household <- get_acs(geography = "tract", county = "Honolulu", state = "HI",
 
 ## Total Number of Households
 
-
-```{r}
-
-```
 
 ##Workforce Area Statistics
 
@@ -136,5 +132,47 @@ hh_total_map <- ggplot(hh_data) +
                                       "households"))
 
 hh_total_map
+```
+```{r}
+#vehicle availability
+
+vehicle_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = vehiclesE)) +
+  scale_fill_viridis_c(name = "Available Vehicles per Census Tract",
+                       breaks = breaks <- seq(0, 6000, by = 1000),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "vehicles"))
+
+vehicle_map
+```
+```{r}
+#income
+income_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = incomeE)) +
+  scale_fill_viridis_c(name = "Census Tracts by Monthly Household Income",
+                       breaks = breaks <- seq(0, 3500, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "dollars"))
+
+income_map
+```
+
+```{r}
+#household size
+hh_size_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = totE)) +
+  scale_fill_viridis_c(name = "Honolulu Census Tracts by Number of Households",
+                       breaks = breaks <- seq(0, 3000, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+hh_size_map
+```
+
+```{r}
+#structure
 ```
 
