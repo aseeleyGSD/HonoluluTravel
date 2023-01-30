@@ -122,6 +122,7 @@ hh_total_map <- ggplot(hh_data) +
                        labels = paste(prettyNum(breaks, big.mark = ","),
                                       "households"))
 
+
 hh_total_map +
   theme_bw()
 ```
