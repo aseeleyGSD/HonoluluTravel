@@ -130,10 +130,10 @@ hh_data <- hh_data %>%
 hh_total_map <- ggplot(hh_data) +
   geom_sf(color = NA, 
           aes(fill = totE)) +
-  scale_fill_viridis_c(name = "Honolulu Census Tracts by Population",
-                       breaks = breaks <- seq(0, 5000, by = 100),
+  scale_fill_viridis_c(name = "Honolulu Census Tracts by Number of Households",
+                       breaks = breaks <- seq(0, 3000, by = 500),
                        labels = paste(prettyNum(breaks, big.mark = ","),
-                                      "population"))
+                                      "households"))
 
 hh_total_map
 ```
