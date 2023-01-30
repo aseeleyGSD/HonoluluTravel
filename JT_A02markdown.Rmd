@@ -80,7 +80,7 @@ census_2020 <- get_decennial(geography = "tract",
 ```
 
 ```{r}
-land_area <- st_read("C:/Users/jtkel/OneDrive/MUP/MUP_Obsidian/SPRING 2023 COURSES/FORECASTING/HonoluluTravel/Census_Tracts_2010_Land_KM.geojson")
+land_area <- st_read("~/GSD23/Forecasting/Github/HonoluluTravel/Tracts_KM.geojson")
 ```
 
 ```{r}
@@ -107,5 +107,28 @@ land_area_census <- merge(land_area, st_drop_geometry(census_2020), by.x = "GEOI
 
 ```
 
+
+```{r}
+land_area_census <- land_area_census %>%
+mutate(pop_density = tot_pop / Land_KM)
+
+```
+
+```{r}
+pop_dens_pts <- st_sample(land_area_census, 
+                            size = ceiling(land_area_census$pop_density/100))
+```
+
+```{r}
+ggplot(land_area_census) + 
+  geom_sf(color = NA) +
+  geom_sf(data = pop_dens_pts, 
+          aes(color = 'coral'), 
+          alpha = 0.3,
+          size = 0.1) +
+  scale_color_brewer("Population Density\n(each points represents\n100 people)",
+                     palette = "Set1") +
+  theme_void()  +
+  guides(color = guide_legend(override.aes = list(size=5, alpha = 0.6)))
 ```
 
