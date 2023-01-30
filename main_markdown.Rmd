@@ -59,8 +59,13 @@ household <- get_acs(geography = "tract", county = "Honolulu", state = "HI",
 
 ## Total Number of Households
 
-```{r message=FALSE, warning=FALSE, results='hide'}
-```
+## A Continuous or Categorical Variable Describing Household Vehicle Availability
+
+## A Continuous or Categorical Variable Describing Household Income
+
+## A Continuous or Categorical Variable Describing Household Size
+
+## A Continuous or Categorical Variable Describing Household Structure or Lifecycle Stage
 
 # Land-use (employment) characteristics (LEHD Origin-Destination Employment Statistics)
  
@@ -82,6 +87,14 @@ lehd_tracts <- lehd_blocks %>%
   summarize(across(everything(), ~sum(.)))
 ```
 
+## Total Number of Employees
+
+## Number of Retail Employees (NAICS Sectors 44 and 45)
+
+## Number of Service Employees (NAICS Sectors 48 through 92)
+
+## Number of Basic Employees (NAICS Sectors 11 through 42)
+
 # Geographic Characteristics
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
@@ -100,4 +113,12 @@ lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOI
 lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
 ```
 
-# Density
+## Land Area
+
+# Densities (Land Area in Denominator)
+
+## Population Density 
+
+## Employment Density
+
+## Activity (Population + Employment) Density
