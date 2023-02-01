@@ -12,15 +12,20 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r message=FALSE, warning=FALSE}
-library(ggplot2, quiet=TRUE)
-library(tidycensus, quiet=TRUE)
-library(tigris, quiet=TRUE)
-library(sf, quiet=TRUE)
-library(units, quiet=TRUE)
-library(ggspatial, quiet=TRUE)
-library(ggthemes, quiet=TRUE)
-library(tidyverse, quiet=TRUE)
-library(dplyr, quiet=TRUE)
+library(ggplot2)
+library(tidycensus)
+library(tigris)
+library(sf)
+library(units)
+library(ggspatial)
+library(ggthemes)
+library(tidyverse)
+library(dplyr)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(ggalt)
+library(viridis)
 ```
 
 # Introduction
@@ -51,24 +56,12 @@ acs_vars <- load_variables(2021, "acs5")
 ```{r message=FALSE, warning=FALSE, results='hide'}
 household <- get_acs(geography = "tract", county = "Honolulu", state = "HI", 
                            year = 2021, survey = "acs5",
-                           variables = c(tot = "B11012_001", vehicles = "B08201_002"),
+                           variables = c(tot = "B11012_001", vehicles = "B08141_001", lives_alone = "B09021_002", w_spouse                            = "B09021_003", w_partner = "B09021_004", num_children = "B09021_005", young_alone = "B09021_009", young_married = "B09021_010", young_partner = "B09021_011", young_kids = "B09021_012", mid_alone = "B09021_016", mid_married = "B09021_017", mid_partner = "B09021_018", mid_kids = "B09021_019", old_alone = "B09021_023", old_married = "B09021_024", old_partner = "B09021_025", old_kids = "B09021_026", income =  "B28004_001", size_1 = "B11016_010", size_2 = "B11016_011", size_3 = "B11016_012", size_4 = "B11016_013", size_5 = "B11016_014", size_6 = "B11016_015", size_7more = "B11016_016", avg_size = "B25010_001"),
                            output = "wide", geometry = TRUE) 
 ```
 
-# Household Characteristics (2021 ACS, 5-year sample)
+<!-- Workforce Statistics Data -->
 
-## Total Number of Households
-
-## A Continuous or Categorical Variable Describing Household Vehicle Availability
-
-## A Continuous or Categorical Variable Describing Household Income
-
-## A Continuous or Categorical Variable Describing Household Size
-
-## A Continuous or Categorical Variable Describing Household Structure or Lifecycle Stage
-
-# Land-use (employment) characteristics (LEHD Origin-Destination Employment Statistics)
- 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 lehd_blocks <- read_csv('https://lehd.ces.census.gov/data/lodes/LODES7/hi/wac/hi_wac_S000_JT00_2019.csv.gz', show_col_types = FALSE) %>%
   rename(total_emp = C000) %>%
@@ -87,6 +80,142 @@ lehd_tracts <- lehd_blocks %>%
   summarize(across(everything(), ~sum(.)))
 ```
 
+```{r message=FALSE, warning=FALSE, results='hide'}
+tracts_original <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Census_Tracts_(2010).geojson')
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+tracts_KM <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Tracts_KM.geojson')
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+lehd_tracts_join <- inner_join(lehd_tracts, tracts_KM, by=c('GEOID'='GEOID10'))
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_KM
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+hh_data <- household[-149,]
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+Hi_state_plane <- "+proj=tmerc +lat_0=21.66666666666667 +lon_0=-160.1666666666667 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+hh_data <- hh_data %>%
+  st_transform(Hi_state_plane)
+```
+
+# Household Characteristics (2021 ACS, 5-year sample)
+
+## Total Number of Households
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+hh_total_map <- ggplot(hh_data) +
+  geom_sf(color = NA,
+          aes(fill = totE)) +
+  scale_fill_viridis_c(name = "Honolulu Census Tracts by Number of Households",
+                       breaks = breaks <- seq(0, 3000, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+
+hh_total_map +
+  theme_bw()
+```
+
+## Household Vehicle Availability
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+vehicle_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = vehiclesE)) +
+  scale_fill_viridis_c(name = "Available Vehicles per Census Tract",
+                       breaks = breaks <- seq(0, 6000, by = 1000),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "vehicles"))
+
+vehicle_map +
+  theme_bw()
+```
+
+## Household Income
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+income_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = incomeE)) +
+  scale_fill_viridis_c(name = "Census Tracts by Monthly Household Income",
+                       breaks = breaks <- seq(0, 3500, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "dollars"))
+
+income_map +
+  theme_bw()
+```
+
+## Household Size
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+hh_size_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = avg_sizeE)) +
+  scale_fill_viridis_c(name = "Census Tracts by Average Household Size",
+                       breaks = breaks <- seq(0, 5, by = 1),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "people"))
+
+hh_size_map +
+  theme_bw()
+```
+
+## Household Structure or Lifecycle Stage
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+hh_data$with_kids <- hh_data$young_kidsE + hh_data$mid_kidsE + hh_data$old_kidsE
+
+kids_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = with_kids)) +
+  scale_fill_viridis_c(name = "Number of Households with Kids",
+                       breaks = breaks <- seq(0, 1200, by = 100),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+kids_map +
+  theme_bw()
+
+2
+alone_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = lives_aloneE)) +
+  scale_fill_viridis_c(name = "Number of Households Living Alone",
+                       breaks = breaks <- seq(0, 1200, by = 100),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+alone_map +
+  theme_bw()
+
+
+spouse_map <- ggplot(hh_data) +
+  geom_sf(color = NA, 
+          aes(fill = w_spouseE)) +
+  scale_fill_viridis_c(name = "Number of Households Living with Spouse",
+                       breaks = breaks <- seq(0, 4700, by = 500),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "households"))
+
+spouse_map +
+  theme_bw()
+```
+
+# Land-use (employment) characteristics (LEHD Origin-Destination Employment Statistics)
+
+
+ 
 ## Total Number of Employees
 
 ## Number of Retail Employees (NAICS Sectors 44 and 45)
@@ -96,22 +225,6 @@ lehd_tracts <- lehd_blocks %>%
 ## Number of Basic Employees (NAICS Sectors 11 through 42)
 
 # Geographic Characteristics
-
-```{r message=FALSE, warning=FALSE, results='hide'}
-tracts_original <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Census_Tracts_(2010).geojson')
-```
-
-```{r message=FALSE, warning=FALSE, results='hide'}
-tracts_land_area <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Census_Tracts_2010_Land_KM.geojson')
-```
-
-```{r message=FALSE, warning=FALSE, results='hide'}
-lehd_tracts_join <- inner_join(lehd_tracts, tracts_land_area, by=c('GEOID'='GEOID10'))
-```
-
-```{r message=FALSE, warning=FALSE, results='hide'}
-lehd_tracts_join$employment_density <- lehd_tracts_join$total_emp / lehd_tracts_join$Land_Area
-```
 
 ## Land Area
 
