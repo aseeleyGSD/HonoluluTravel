@@ -244,4 +244,20 @@ hist_retail <- ggplot(lehd_tracts_join) +
 
 hist_retail
 ```
+```{r}
+hist_basic <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = basic_emp),
+                 fill = "purple",
+                 color = "thistle4")
+
+hist_basic
+```
+```{r}
+hist_basic <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = basic_emp),
+                 fill = "purple",
+                 color = "thistle4")
+
+hist_basic
+```
 
