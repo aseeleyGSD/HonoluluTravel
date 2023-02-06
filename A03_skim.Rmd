@@ -2,11 +2,13 @@
 title: "A03_SKIM"
 author: "jt + alicia"
 date: "2023-02-06"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 <!-- load packages -->
@@ -33,10 +35,68 @@ library(readxl)
 
 <!-- load matrix and exported TransCAD road network -->
 
-```{r}
+```{r message = FALSE, warning = FALSE, echo = FALSE, results = 'hide'}
 matrix <- read_excel(here("skim6.xlsx"))
 
 TransCAD_streets <- st_read(here("hono_main_roads 2023-02-05.shp"))
 
 ```
 
+
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+matrix <- matrix %>% 
+  mutate_if(is.character, as.numeric)
+
+matrix$Origin <- as.character(matrix$Origin)
+
+```
+
+# A03: Road network skim
+
+## Workflow
+
+For our assignment 3 workflow, we generally followed the guidelines and assumptions set forth in the series of tutorials, as these made sense in the context of Honolulu. This was true for setting vehicle speed by road type, filtering the road types to be included in the network (with the exception that we also included Type = ‘primary’ in our model) and the steps for deleting orphan roads. As we ran through the process of troubleshooting our skims, however, we did make some assumptions that deviated from the example workflow, which are described in the following sections.
+
+## One-way roads
+
+The most substantial issue we faced was traffic analysis zones showing up as disconnected from the rest of the network due to one-way streets. We investigated dozens of these supposed one-way streets on Google Earth, and discovered that the vast majority were mislabeled and actually accommodate vehicles in both directions. We ran several selection formulas to change these streets to two-way roads. We also noticed that where some actual one-way streets existed as the primary connector for a TAZ, the skim showed that zone as disconnected from the rest of the network, either because there was a supposed travel lane entering the TAZ but no way to exit, or vice versa. Our investigation found that in these cases, much of the local road network had been filtered out as residential roads and were not included in the model, so where in reality a driver would be easily able to take similar one-way streets to enter and exit a TAZ, only one street would be factored into the model. In some cases, we deleted these one-way roads and recalculated the centroid connectors to find the nearest two-way street, but for the remainder, we found it appropriate to change the designation of the roads to two-way streets, as we assume that this is a better estimation of actual travel time.
+
+
+```{r figurename1, echo=FALSE, fig.cap="Example of one-way road eliding two-way accessibility", out.width = '50%'}
+knitr::include_graphics(here("OneWayTract.png"))
+```
+
+## Centroids Populating Outside Traffic Analysis Zones (TAZs)
+
+In several cases, we noticed centroids being generated outside the corresponding TAZ. This is likely due to the irregular shape and size of a given census tract. Many of these centroids generated off the coastline in the ocean. When we examined these centroids, we took note of the length of the connectors to the nearest road in comparison with the rest of the census tract. We decided that although it seemed strange for the centroids to remain in the ocean, the connectors still pretty well represented the distance and travel time appropriate for traveling from elsewhere in the tract to the main roads. For this reason, we decided not to move these centroids.
+
+
+```{r figurename2, echo=FALSE, fig.cap="Example of rogue centroid", out.width = '50%'}
+knitr::include_graphics(here("OceanCentroid.png"))
+```
+## Results of skim
+
+We ended up running a total of 6 skims to achieve a fully populated travel time matrix.
+
+## Skim 1
+
+The first skim yielded approximately 15 blank tracts in each direction. Upon further investigation, we quickly discovered that many of the main highways were incorrectly labeled as one-way in the OSM data. We corrected this, and iterated once more
+
+## Skim 2-6
+
+The second skim was a major improvement. We then identified which centroids remained unpopulated with travel times, and inspected the road networks in the respective locations, removing orphan roads and changing street directions when we confirmed an inaccuracy in the OSM data. However, when we ran the skim again, our matrix had regressed. After a few more iterations, we concluded the best course of action was to adjust all roads in the network to be bi-directional (see above)
+
+## Skim 6
+
+Our sixth skim yielded a fully populated matrix. See below for a summary of each centroid's (as origin point) average travel time. The least accessible TAZ (northeast corner of the island) had an average travel time of approximately 52 minutes. The most accessible (downtown Honolulu) had an average travel time of just under 13 minutes
+
+
+```{r figurename3, echo=FALSE, fig.cap="Least accessible TAZ: Average travel time of 52 min", out.width = '50%'}
+knitr::include_graphics(here("LeastAccessible.png"))
+```
+```{r figurename4, echo=FALSE, fig.cap="Most accessible TAZ: average travel time of 13 min", out.width = '50%'}
+knitr::include_graphics(here("MostAccessible.png"))
+```
+```{r figurename, echo=FALSE, fig.cap="Average travel times", out.width = '50%'}
+knitr::include_graphics(here("TravelTime.png"))
+```

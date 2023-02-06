@@ -349,5 +349,34 @@ ggplot(land_area_census) +
   theme_void()  +
   guides(color = guide_legend(override.aes = list(size=5, alpha = 0.6)))
 ```
+<!-- load matrix and exported TransCAD road network -->
 
+```{r}
+matrix <- read_excel(here("skim6.xlsx"))
+
+TransCAD_streets <- st_read(here("hono_main_roads 2023-02-05.shp"))
+
+```
+```{r}
+matrix <- matrix %>% 
+  mutate_if(is.character, as.numeric)
+
+matrix$Origin <- as.character(matrix$Origin)
+
+```
+
+# A03: Road network skim
+
+## Workflow
+
+For our assignment 3 workflow, we generally followed the guidelines and assumptions set forth in the series of tutorials, as these made sense in the context of Honolulu. This was true for setting vehicle speed by road type, filtering the road types to be included in the network (with the exception that we also included Type = ‘primary’ in our model) and the steps for deleting orphan roads. As we ran through the process of troubleshooting our skims, however, we did make some assumptions that deviated from the example workflow, which are described in the following sections.
+
+## One-way roads
+
+The most substantial issue we faced was traffic analysis zones showing up as disconnected from the rest of the network due to one-way streets. We investigated dozens of these supposed one-way streets on Google Earth, and discovered that the vast majority were mislabeled and actually accommodate vehicles in both directions. We ran several selection formulas to change these streets to two-way roads. We also noticed that where some actual one-way streets existed as the primary connector for a TAZ, the skim showed that zone as disconnected from the rest of the network, either because there was a supposed travel lane entering the TAZ but no way to exit, or vice versa. Our investigation found that in these cases, much of the local road network had been filtered out as residential roads and were not included in the model, so where in reality a driver would be easily able to take similar one-way streets to enter and exit a TAZ, only one street would be factored into the model. In some cases, we deleted these one-way roads and recalculated the centroid connectors to find the nearest two-way street, but for the remainder, we found it appropriate to change the designation of the roads to two-way streets, as we assume that this is a better estimation of actual travel time.
+
+
+```{r figurename, echo=FALSE, fig.cap="Example of one-way road eliding two-way accessibility", out.width = '50%'}
+knitr::include_graphics(c(paste(path, "/OneWayTract.png", sep="")))
+```
 
