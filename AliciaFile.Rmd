@@ -253,11 +253,11 @@ hist_basic <- ggplot(lehd_tracts_join) +
 hist_basic
 ```
 ```{r}
-hist_basic <- ggplot(lehd_tracts_join) +
-  geom_histogram(aes(x = basic_emp),
+hist_service <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = service_emp),
                  fill = "purple",
                  color = "thistle4")
 
-hist_basic
+hist_service
 ```
 

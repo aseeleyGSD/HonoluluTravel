@@ -1,6 +1,6 @@
 ---
 title: "Zonal Statistics"
-author: "Alicia, JT, Marina"
+author: "Alicia & JT"
 date: "01/31/2023"
 output: 
   rmdformats::downcute
@@ -26,9 +26,16 @@ library(rgeos)
 library(maptools)
 library(ggalt)
 library(viridis)
+library(here)
 ```
 
-# Introduction
+
+```{r}
+path = "C:/Users/jtkel/OneDrive/MUP/MUP_Obsidian/SPRING 2023 COURSES/FORECASTING/HonoluluTravel"
+```
+
+
+# A01: Introduction
 
 Honolulu is the capital city of the state of Hawaii. The city’s name means ‘sheltered bay’ in the Hawaiian language and today is home to over 390,000 people. The urban city of Honolulu extends about 10 miles along the southeastern shore of Oahu and four miles inland into the foothills of the Koolau Range. The city-county comprises all of Oahu and some outlying islets, which have an aggregate land area of only three square miles but extend for more than 1,300 miles when accounting for ocean.  
 
@@ -44,14 +51,15 @@ Understanding the demographics and economies of the city will help us form assum
 
 When looking at Honolulu and the greater island of Oahu, we made some interesting observations related to transportation. Firstly, city growth is heavily constrained by surrounding geography. The island is made up of two major mountain ranges hosting several extinct volcanoes: The Waiʻanae range to the west, and Koʻolau range to the east. These mountain ranges cause most of the island to be unfit for development due to the steep terrain. A map of streets on Oahu reveals that there are very few connections through or over the mountain ranges. Sandwiched between the coastline and the mountains, Honolulu has little room for growth and must maximize infrastructure investments.
 
-```{r figurename, echo=FALSE, fig.cap="Maps of Honolulu: Buildings, Elevations, and Streets.", out.width = '100%'}
-knitr::include_graphics("/Users/marinaribeiro/Downloads/HonoluluTravel-main-4/Hono-Maps-01.png")
+```{r figurename, echo=FALSE, fig.show = 'hold', fig.align = 'center', fig.cap="Maps of Honolulu: Buildings, Elevations, and Streets.", out.width = '100%'}
+knitr::include_graphics(c(paste(path, "/Hono-Buildings.png", sep = ""), paste(path, "/Hono-Elevation.png", sep = ""), paste(path, "/Hono-Streets.png", sep = "")))
 ```
 <!-- Data gathering
 Get ACS Household Data Variables -->
 ```{r message=FALSE, warning=FALSE, results='hide'}
 acs_vars <- load_variables(2021, "acs5")
 ```
+
 <!-- get ACS household characteristics -->
 ```{r message=FALSE, warning=FALSE, results='hide'}
 household <- get_acs(geography = "tract", county = "Honolulu", state = "HI", 
@@ -81,11 +89,11 @@ lehd_tracts <- lehd_blocks %>%
 ```
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
-tracts_original <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Census_Tracts_(2010).geojson')
+tracts_original <- st_read(paste(path, "/Census_Tracts_(2010).geojson", sep = ""))
 ```
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
-tracts_KM <- st_read('/Users/marinaribeiro/Documents/2. Academic Career/3. MA Degree/Harvard GSD/4. Terms/4. Spring 2023/SES 5394 Travel Behavior and Forecasting/2. Assignments/A02 Zonal Statistics/HonoluluTravel/Tracts_KM.geojson')
+tracts_KM <- st_read(paste(path, "/Tracts_KM.geojson", sep = ""))
 ```
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
@@ -109,9 +117,11 @@ hh_data <- hh_data %>%
   st_transform(Hi_state_plane)
 ```
 
-# Household Characteristics (2021 ACS, 5-year sample)
+# A02: Zonal Statistics
 
-## Total Number of Households
+## Household Characteristics (2021 ACS, 5-year sample)
+
+### Total Number of Households
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 hh_total_map <- ggplot(hh_data) +
@@ -127,7 +137,7 @@ hh_total_map +
   theme_bw()
 ```
 
-## Household Vehicle Availability
+### Household Vehicle Availability
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 vehicle_map <- ggplot(hh_data) +
@@ -142,7 +152,7 @@ vehicle_map +
   theme_bw()
 ```
 
-## Household Income
+### Household Income
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 income_map <- ggplot(hh_data) +
@@ -157,7 +167,7 @@ income_map +
   theme_bw()
 ```
 
-## Household Size
+### Household Size
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 hh_size_map <- ggplot(hh_data) +
@@ -172,7 +182,7 @@ hh_size_map +
   theme_bw()
 ```
 
-## Household Structure or Lifecycle Stage
+### Household Structure or Lifecycle Stage
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 hh_data$with_kids <- hh_data$young_kidsE + hh_data$mid_kidsE + hh_data$old_kidsE
@@ -212,26 +222,132 @@ spouse_map +
   theme_bw()
 ```
 
-# Land-use (employment) characteristics (LEHD Origin-Destination Employment Statistics)
+## Land-use (employment) characteristics (LEHD Origin-Destination Employment Statistics)
+
+```{r}
+lehd_tracts_join <- lehd_tracts_join %>% 
+  st_sf(sf_column_name = 'geometry')
+```
 
 
- 
-## Total Number of Employees
+### Total Number of Employees
 
-## Number of Retail Employees (NAICS Sectors 44 and 45)
 
-## Number of Service Employees (NAICS Sectors 48 through 92)
+```{r}
+#employees
 
-## Number of Basic Employees (NAICS Sectors 11 through 42)
+employee_map <- ggplot(lehd_tracts_join) +
+  geom_sf(color = NA, 
+          aes(fill = total_emp)) +
+  scale_fill_viridis_c(name = "Total number of employees",
+                       breaks = breaks <- seq(10000, 40000, by = 3000),
+                       labels = paste(prettyNum(breaks, big.mark = ","),
+                                      "employees"))
 
-# Geographic Characteristics
+employee_map
+```
 
-## Land Area
+### Number of Retail Employees (NAICS Sectors 44 and 45)
 
-# Densities (Land Area in Denominator)
 
-## Population Density 
+```{r}
+hist_retail <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = retail_emp),
+                 fill = "purple",
+                 color = "thistle4")
 
-## Employment Density
+hist_retail
+```
 
-## Activity (Population + Employment) Density
+
+### Number of Service Employees (NAICS Sectors 48 through 92)
+
+```{r}
+hist_service <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = service_emp),
+                 fill = "purple",
+                 color = "thistle4")
+
+hist_service
+```
+
+### Number of Basic Employees (NAICS Sectors 11 through 42)
+
+```{r}
+hist_retail <- ggplot(lehd_tracts_join) +
+  geom_histogram(aes(x = retail_emp),
+                 fill = "purple",
+                 color = "thistle4")
+
+hist_retail
+```
+
+
+## Densities (Land Area in Denominator)
+
+### Population Density 
+
+
+```{r}
+census_2020 <- get_decennial(geography = "tract",
+                          state = "HI", county = "Honolulu",
+                          year = 2020,
+                          output = "wide",
+                          variables = c(tot_pop = 'P1_001N'),
+                          geometry = TRUE)
+```
+
+```{r}
+land_area <- st_read(paste(path, "/Tracts_KM.geojson", sep=""))
+```
+
+```{r}
+land_area$GEOID <- land_area$GEOID10
+```
+
+```{r}
+Hi_state_plane <- "+proj=tmerc +lat_0=21.66666666666667 +lon_0=-160.1666666666667 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m +no_defs"
+```
+
+
+
+
+```{r}
+land_area <- land_area %>% 
+  st_transform(Hi_state_plane)
+
+census_2020 <- census_2020 %>% 
+  st_transform(Hi_state_plane)
+```
+
+```{r}
+land_area_census <- merge(land_area, st_drop_geometry(census_2020), by.x = "GEOID", by.y = "GEOID")
+
+```
+
+
+```{r}
+land_area_census <- land_area_census %>%
+mutate(pop_density = tot_pop / Land_KM)
+
+```
+
+```{r}
+pop_dens_pts <- st_sample(land_area_census, 
+                            size = ceiling(land_area_census$pop_density/100))
+```
+
+```{r}
+ggplot(land_area_census) + 
+  geom_sf(color = NA) +
+  geom_sf(data = pop_dens_pts, 
+          aes(color = 'coral'), 
+          alpha = 0.3,
+          size = 0.1) +
+  scale_color_brewer("Population Density\n(each points represents\n100 people)",
+                     palette = "Set1") +
+  theme_void()  +
+  guides(color = guide_legend(override.aes = list(size=5, alpha = 0.6)))
+```
+
+

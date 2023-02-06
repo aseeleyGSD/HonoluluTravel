@@ -1,0 +1,42 @@
+---
+title: "A03_SKIM"
+author: "jt + alicia"
+date: "2023-02-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- load packages -->
+
+```{r message=FALSE, warning=FALSE}
+
+library(ggplot2)
+library(tidycensus)
+library(tigris)
+library(sf)
+library(units)
+library(ggspatial)
+library(ggthemes)
+library(tidyverse)
+library(dplyr)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(ggalt)
+library(viridis)
+library(here)
+library(readxl)
+```
+
+<!-- load matrix and exported TransCAD road network -->
+
+```{r}
+matrix <- read_excel(here("skim6.xlsx"))
+
+TransCAD_streets <- st_read(here("hono_main_roads 2023-02-05.shp"))
+
+```
+
