@@ -1,0 +1,5 @@
+
+9
+"Date",I,1,4,0,10,0,,"","Exception date (YYYYMMDD)",,"Sum",
+"Service",I,5,4,0,10,0,,"","Unique ID for service dropped/added on exception date",,"Sum",
+"Change",C,9,1,0,1,0,,"","Whether the service was dropped or added",,"Copy",

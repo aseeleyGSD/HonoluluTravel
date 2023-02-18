@@ -1,0 +1,18 @@
+
+140
+"STOP_ID",I,1,4,0,9,0,,"","",,"Sum",
+"Stop",I,5,4,0,10,0,,"","Unique GTFS Stop ID",,"Sum",
+"Full Name",C,9,50,0,50,0,,"","Name of Stop",,"Copy",
+"Code",I,59,4,0,10,0,,"","Stop Code",,"Sum",
+"Description",C,63,1,0,1,0,,"","Description of Stop",,"Copy",
+"Zone",C,64,10,0,10,0,,"","Stop Zone ID",,"Copy",
+"URL",C,74,41,0,41,0,,"","URL for the Stop",,"Copy",
+"Station",C,115,1,0,1,0,,"","Whether the Stop is a Station Grouping",,"Copy",
+"Parent",C,116,1,0,1,0,,"","ID of Parent Station",,"Copy",
+"Pickup",S,117,2,0,3,0,,"","Pickup Type|0 = Regularly Scheduled Pickup|1 = No Pickup Available|2 = Must Phone Agency to Arrange Pickup|3 = Must Coordinate with Driver to Arrange Pickup",,"Sum",
+"Dropoff",S,119,2,0,3,0,,"","Dropoff Type|0 = Regularly Scheduled Drop Off|1 = No Drop Off Available|2 = Must Phone Agency to Arrange Drop Off|3 = Must Coordinate with Driver to Arrange Drop Off",,"Sum",
+"Service",I,121,4,0,20,0,,"","Service ID|Identifies a Set of Dates When Service is Available",,"Sum",
+"Length",R,125,8,0,10,6,,"","Segment Length",,"Sum",
+"Sequence",S,133,2,0,5,0,,"","Sequence from stop_times.txt",,"Sum",
+"Timepoint",S,135,2,0,5,0,,"","Timepoint from stop_times.txt",,"Sum",
+"near_node",I,137,4,0,8,0,,"","",,"Sum",
