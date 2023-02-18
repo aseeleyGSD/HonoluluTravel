@@ -1,0 +1,84 @@
+---
+title: "TransitSkim"
+author: "jt + alicia"
+date: "2023-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(tidytransit)
+library(here)
+library(ggthemes)
+library(tigris)
+library(dplyr)
+
+hono_tracts <- tracts(state = "HI", county = "Honolulu") %>% 
+  filter(!TRACTCE=="981200")
+
+```
+```{r}
+
+hono_bus_gtfs <- read_gtfs(
+  "http://webapps.thebus.org/transitdata/Production/google_transit.zip")
+
+route_shapes <- shapes_as_sf(hono_bus_gtfs$shapes)
+
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = hono_tracts,
+          fill = "antiquewhite",
+            color = alpha("black", 0.096)) +
+  geom_sf(data = route_shapes,
+          aes(color = shape_id), linewidth = .5) +
+  theme_map() +
+  theme(legend.position = "none")
+```
+```{r}
+library(readxl)
+library(here)
+
+IVTT <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "In-Vehicle Time")
+
+Transfer_wait <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Transfer Wait Time")
+
+Transfer_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Transfer Walk Time")
+
+Access_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Access Walk Time")
+
+Egress_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Egress Walk Time")
+
+total_time <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Total Time")
+
+fare <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>% 
+  read_xlsx(sheet = "Fare")
+
+
+```
+
