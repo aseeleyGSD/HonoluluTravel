@@ -1,0 +1,38 @@
+---
+title: "A04: Transit Skim"
+author: "jt + alicia"
+date: "2023-02-18"
+output: rmdformats::downcute
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+```
+
+# Workflow
+
+In this assignment, we were generally able to follow the workflow prescribed without much deviation. One item of note, however, is that Honolulu’s public transit is comprised entirely of bus routes - some with a dedicated lane, some without. Therefore we did not need to take into account rail networks or any other type of transit system.  After doing a bit of google searching of local conditions, we decided to set the in-vehicle travel speed for the bus at 25 MPH.
+
+# Creating a Public Transit Network
+
+This step in the process gave us a snag. Every time we attempted to create the network, we got the following error message: “Milepost errors found in the stop layer. Please check the log file”
+
+Wit some crucial help, we traced the error to an issue in the dataset wherein some of the nodes were listed out of order due to their location in an overlapping / looping part of the route. Therefore, the mileposts, or cumulative distance of the routes, were jumping back and forth (i.e. not adding up cumulatively) in these locations. We able to identify where this mixup was happening by opening the log file of the project and checking the list of node IDs where the error was triggering. We decided that deleting these stops was the best course of action, and that they would not cause major changes in the overall network or travel times.
+
+# Visualization
+
+
+As we visualized our outputs in R, we decided to run transit access for one origin location. Our location of choice was the census tract containing the Ala Moana shopping center in downtown Honolulu. We know that this is a popular destination for tourists and locals, and that it is located in the densest section of downtown. Our output showed generally good access to adjacent downtown tracts, which was not surprising, but we were also interested to see pronounced access to the tract containing Schofield Barracks, which is halfway across the island. We suppose this makes sense because soldiers stationed in Hawaii likely do not own cars, and thus transportation planners would recognize the need for them to have access to the bus system. The visualization also showed good access to a park on the northwest coast of the island (see Figure 2).
+
+
+
+
+```{r figurename, echo=FALSE, fig.show = 'hold', fig.align = 'center', fig.cap="Figure 1: TheBus network, City & County of Honolulu", out.width = '100%'}
+knitr::include_graphics(paste(here("A4_Images", "hono_routes.png")))
+```
+
+```{r figurename2, echo=FALSE, fig.show = 'hold', fig.align = 'center', fig.cap="Figure 2: TheBus access from Downtown Honolulu", out.width = '100%'}
+knitr::include_graphics(paste(here("A4_Images", "from_downtown.png")))
+```

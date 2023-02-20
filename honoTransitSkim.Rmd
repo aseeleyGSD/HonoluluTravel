@@ -31,7 +31,7 @@ route_shapes <- shapes_as_sf(hono_bus_gtfs$shapes)
 ```
 
 ```{r}
-ggplot() +
+hono_routes <- ggplot() +
   geom_sf(data = hono_tracts,
           fill = "antiquewhite",
             color = alpha("black", 0.096)) +
@@ -39,6 +39,12 @@ ggplot() +
           aes(color = shape_id), linewidth = .5) +
   theme_map() +
   theme(legend.position = "none")
+
+hono_routes
+
+pdf("hono_routes.pdf", width = 11, height = 8.5)
+hono_routes
+dev.off()
 ```
 ```{r}
 library(readxl)
@@ -80,5 +86,99 @@ fare <- here("TRANSCAD",
   read_xlsx(sheet = "Fare")
 
 
+```
+
+
+```{r}
+IVTT_long <- IVTT %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         IVTT = value)
+
+transferWait_long <- Transfer_wait %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         transfer_wait = value)
+
+transferWalk_long <- Transfer_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         transfer_walk = value)
+
+accessWalk_long <- Access_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         access_walk = value)
+
+egressWalk_long <- Egress_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         egress_walk = value)
+
+totalTime_long <- total_time %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         total_time = value)
+
+fare_long <- fare %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         fare = value)
+```
+```{r}
+full_skim <- full_join(IVTT_long, transferWait_long) %>% 
+  full_join(transferWalk_long) %>% 
+  full_join(accessWalk_long) %>% 
+  full_join(egressWalk_long) %>% 
+  full_join(totalTime_long) %>% 
+  full_join(fare_long)
+```
+```{r}
+library(knitr)
+
+head(full_skim) %>% 
+  kable()
+```
+
+
+```{r}
+from_downtown <- full_skim %>% 
+  filter(from_GEOID == "15003003700") %>% 
+  select(-from_GEOID) %>% 
+  rename(GEOID = to_GEOID)
+
+```
+
+```{r}
+from_downtown_tracts <- left_join(hono_tracts, from_downtown)
+```
+```{r}
+from_downtown_map <- ggplot(from_downtown_tracts) +
+  geom_sf(aes(fill = total_time)) +
+  geom_sf(data = route_shapes) +
+  scale_fill_viridis_c(name = 
+    "Total travel time\nby transit from\ndowntown transit center") +
+  theme_map()
+
+from_downtown_map
+```
+```{r}
+pdf("from_downtown.pdf", width = 11, height = 8.5)
+from_downtown_map
+dev.off()
 ```
 
