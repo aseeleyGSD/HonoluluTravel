@@ -3,8 +3,8 @@ title: 'Honolulu accessibility: a preliminary report'
 author: "JT Keller and Alicia Seeley"
 date: "2023-02-21"
 output:
-  rmdformats::downcute: default
-  '': default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
