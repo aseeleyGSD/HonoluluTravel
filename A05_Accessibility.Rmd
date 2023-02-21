@@ -1,8 +1,9 @@
 ---
-title: "TransitSkim"
+title: "Honolulu accessibility: preliminary report"
 author: "jt + alicia"
 date: "2023-02-18"
-output: html_document
+output:
+  tufte_handout: default
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +19,8 @@ library(tigris)
 library(dplyr)
 library(ggspatial)
 library(sf)
+library(raster)
+library(tufte)
 
 hono_tracts <- tracts(state = "HI", county = "Honolulu") %>% 
   filter(!TRACTCE=="981200")
@@ -299,5 +302,56 @@ ggplot(accessibility_summary) +
   scale_x_continuous(name = "Transit accessibility index") +
   scale_y_continuous(name = "Number of census tracts") +
   theme_minimal()
+```
+```{r}
+tracts <- hono_tracts %>%
+  left_join(accessibility_summary)
+
+transit_access_map <- ggplot(tracts) +
+                annotation_map_tile(type = "stamenbw",
+                      zoomin = 0,
+                      progress = "none") +
+  geom_sf(aes(fill = transit_index),
+          color = NA,
+          alpha = 0.6) +
+  scale_fill_distiller(name = "Transit accessibility",
+                       trans = "log",
+                       breaks = c(0.000001,100),
+                       labels = c("Low",
+                                  "High"),
+                       palette = "RdPu") +
+  theme_map()
+transit_access_map
+```
+```{r}
+tracts <- hono_tracts %>%
+  left_join(accessibility_summary)
+
+Car_access_map <- ggplot(tracts) +
+                annotation_map_tile(type = "stamenbw",
+                      zoomin = 0,
+                      progress = "none") +
+  geom_sf(aes(fill = car_index),
+          color = NA,
+          alpha = 0.6) +
+  scale_fill_distiller(name = "Car accessibility",
+                       trans = "log",
+                       breaks = c(0.000001,100),
+                       labels = c("Low",
+                                  "High"),
+                       palette = "RdPu") +
+  theme_map()
+Car_access_map
+```
+```{r}
+pdf("car_access.pdf", width = 11, height = 8.5)
+Car_access_map
+dev.off()
+```
+
+```{r}
+pdf("transit_access.pdf", width = 11, height = 8.5)
+transit_access_map
+dev.off()
 ```
 
