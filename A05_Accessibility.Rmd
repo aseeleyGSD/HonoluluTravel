@@ -1,10 +1,11 @@
 ---
 title: "Honolulu accessibility: preliminary report"
-author: "jt + alicia"
+author: "JT Keller and Alicia Seeley"
 date: "2023-02-18"
 output:
-  tufte_handout: default
+  tufte::tufte_handout
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -284,7 +285,7 @@ ggplot(accessibility_summary) +
 ```
 
 ```{r}
-ggplot(accessibility_summary) +
+car_barchart <- ggplot(accessibility_summary) +
   geom_histogram(aes(x = car_index),
                  bins = 30,
                  color = "hotpink",
@@ -292,9 +293,15 @@ ggplot(accessibility_summary) +
   scale_x_continuous(name = "Car accessibility index") +
   scale_y_continuous(name = "Number of census tracts") +
   theme_minimal()
+
+car_barchart
+
+pdf("car_barchart.pdf", width = 11, height = 8.5)
+car_barchart
+dev.off()
 ```
 ```{r}
-ggplot(accessibility_summary) +
+transit_barchart <- ggplot(accessibility_summary) +
   geom_histogram(aes(x = transit_index),
                  bins = 30,
                  color = "hotpink",
@@ -302,6 +309,12 @@ ggplot(accessibility_summary) +
   scale_x_continuous(name = "Transit accessibility index") +
   scale_y_continuous(name = "Number of census tracts") +
   theme_minimal()
+
+transit_barchart
+
+pdf("transit_barchart.pdf", width = 11, height = 8.5)
+transit_barchart
+dev.off()
 ```
 ```{r}
 tracts <- hono_tracts %>%
