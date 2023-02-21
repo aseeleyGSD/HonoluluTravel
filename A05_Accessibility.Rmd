@@ -1,0 +1,303 @@
+---
+title: "TransitSkim"
+author: "jt + alicia"
+date: "2023-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(tidytransit)
+library(here)
+library(ggthemes)
+library(tigris)
+library(dplyr)
+library(ggspatial)
+library(sf)
+
+hono_tracts <- tracts(state = "HI", county = "Honolulu") %>% 
+  filter(!TRACTCE=="981200")
+
+```
+```{r}
+
+hono_bus_gtfs <- read_gtfs(
+  "http://webapps.thebus.org/transitdata/Production/google_transit.zip")
+
+route_shapes <- shapes_as_sf(hono_bus_gtfs$shapes)
+
+```
+
+```{r}
+hono_routes <- ggplot() +
+  geom_sf(data = hono_tracts,
+          fill = "antiquewhite",
+            color = alpha("black", 0.096)) +
+  geom_sf(data = route_shapes,
+          aes(color = shape_id), linewidth = .5) +
+  theme_map() +
+  theme(legend.position = "none")
+
+hono_routes
+
+pdf("hono_routes.pdf", width = 11, height = 8.5)
+hono_routes
+dev.off()
+```
+```{r}
+library(readxl)
+library(here)
+
+IVTT <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "In-Vehicle Time")
+
+Transfer_wait <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Transfer Wait Time")
+
+Transfer_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Transfer Walk Time")
+
+Access_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Access Walk Time")
+
+Egress_walk <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Egress Walk Time")
+
+total_time <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>%
+  read_xlsx(sheet = "Total Time")
+
+fare <- here("TRANSCAD",
+             "transit_skim",
+             "Transit_skim.xlsx") %>% 
+  read_xlsx(sheet = "Fare")
+
+car_time <- here("TRANSCAD",
+                 "road_skim",
+                 "skim_GEOID.xlsx") %>% 
+  read_xlsx(sheet = "Travel-time")
+
+
+```
+
+
+```{r}
+IVTT_long <- IVTT %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         IVTT = value)
+
+transferWait_long <- Transfer_wait %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         transfer_wait = value)
+
+transferWalk_long <- Transfer_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         transfer_walk = value)
+
+accessWalk_long <- Access_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         access_walk = value)
+
+egressWalk_long <- Egress_walk %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         egress_walk = value)
+
+totalTime_long <- total_time %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         total_time = value)
+
+fare_long <- fare %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         fare = value)
+
+car_long <- car_time %>% 
+  pivot_longer(cols = -GEOID10) %>% 
+  mutate(value = as.numeric(value)) %>% 
+  rename(from_GEOID = GEOID10,
+         to_GEOID = name,
+         car_time = value)
+```
+```{r}
+full_skim <- full_join(IVTT_long, transferWait_long) %>% 
+  full_join(transferWalk_long) %>% 
+  full_join(accessWalk_long) %>% 
+  full_join(egressWalk_long) %>% 
+  full_join(totalTime_long) %>% 
+  full_join(fare_long) %>% 
+  full_join(car_long)
+```
+```{r}
+library(knitr)
+
+head(full_skim) %>% 
+  kable()
+```
+
+
+```{r}
+from_downtown <- full_skim %>% 
+  filter(from_GEOID == "15003003700") %>% 
+  select(-from_GEOID) %>% 
+  rename(GEOID = to_GEOID)
+
+```
+
+```{r}
+from_downtown_tracts <- left_join(hono_tracts, from_downtown)
+```
+```{r}
+from_downtown_map <- ggplot(from_downtown_tracts) +
+  geom_sf(aes(fill = total_time)) +
+  geom_sf(data = route_shapes) +
+  scale_fill_viridis_c(name = 
+    "Total travel time\nby transit from\ndowntown transit center") +
+  theme_map()
+
+from_downtown_map
+```
+```{r}
+pdf("from_downtown.pdf", width = 11, height = 8.5)
+from_downtown_map
+dev.off()
+```
+
+```{r}
+full_skim <- full_skim %>% 
+  mutate(OVTT = total_time - IVTT) %>% 
+  mutate(perceived_time = (IVTT + 3 * OVTT))
+```
+
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+lehd_blocks <- read_csv('https://lehd.ces.census.gov/data/lodes/LODES7/hi/wac/hi_wac_S000_JT00_2019.csv.gz', show_col_types = FALSE) %>%
+  rename(total_emp = C000) %>%
+  mutate(basic_emp = CNS01+CNS02+CNS03+CNS04+CNS05+CNS06+CNS08+CNS09) %>%
+  rename(retail_emp = CNS07) %>%
+  mutate(service_emp = total_emp - basic_emp - retail_emp) %>%
+  select(w_geocode, total_emp, basic_emp, retail_emp, service_emp)
+```
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+lehd_tracts <- lehd_blocks %>%
+  mutate(w_geocode = as.character(w_geocode)) %>%
+  mutate(GEOID = substr(w_geocode, 1, 11)) %>%
+  select(-w_geocode) %>%
+  group_by(GEOID) %>%
+  summarize(across(everything(), ~sum(.)))
+```
+
+```{r}
+employment_data <- lehd_tracts %>% 
+  st_drop_geometry() %>%
+  select(GEOID, total_emp) %>%
+  rename(to_GEOID = GEOID)
+```
+
+```{r}
+accessibility_df <- full_skim %>%
+  left_join(employment_data)
+```
+```{r}
+logistic_function <- function(travel_time, inflection, stdev) {
+  1/(1+exp((travel_time - inflection) / stdev))
+}
+```
+
+```{r}
+accessibility_df <- accessibility_df %>%
+  mutate(weight_car = logistic_function(car_time, 30, 20),
+         weight_transit = logistic_function(perceived_time, 45, 10))
+```
+
+```{r}
+accessibility_df <- accessibility_df %>%
+  mutate(transit_jobs = total_emp * weight_transit,
+         car_jobs = total_emp * weight_car)
+```
+
+```{r}
+accessibility_summary <- accessibility_df %>%
+  group_by(from_GEOID) %>%
+  summarise(car_access = sum(car_jobs, na.rm = TRUE),
+            transit_access = sum(transit_jobs, na.rm = TRUE))
+```
+
+
+```{r}
+accessibility_summary <- accessibility_summary %>%
+  mutate(car_index = 100*car_access/max(car_access),
+         transit_index = 100*transit_access/max(transit_access))
+```
+
+
+
+```{r}
+ggplot(accessibility_summary) +
+  geom_point(aes(x = car_index,
+                 y = transit_index),
+             alpha = 0.5,
+             color = "hotpink",
+             shape = "o",
+             size = 2.8) +
+  scale_x_continuous(name = "Car accessibility index") +
+  scale_y_continuous(name = "Transit accessibility index") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(accessibility_summary) +
+  geom_histogram(aes(x = car_index),
+                 bins = 30,
+                 color = "hotpink",
+                 fill = "pink") +
+  scale_x_continuous(name = "Car accessibility index") +
+  scale_y_continuous(name = "Number of census tracts") +
+  theme_minimal()
+```
+```{r}
+ggplot(accessibility_summary) +
+  geom_histogram(aes(x = transit_index),
+                 bins = 30,
+                 color = "hotpink",
+                 fill = "pink") +
+  scale_x_continuous(name = "Transit accessibility index") +
+  scale_y_continuous(name = "Number of census tracts") +
+  theme_minimal()
+```
+
