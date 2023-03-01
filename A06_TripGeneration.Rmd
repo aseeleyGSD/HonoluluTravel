@@ -1,0 +1,247 @@
+---
+title: "A06"
+author: "Alicia Seeley"
+date: "2/25/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+library(here)
+library(tidyverse)
+library(downloader)
+library(tidycensus)
+library(sf)
+library(tidycensus)
+library(tigris)
+library(tidyr)
+library(dplyr)
+```
+
+```{r}
+url <- "https://nhts.ornl.gov/assets/2016/download/csv.zip"
+nhts_zipped <- here("nhts.zip")
+nhts_dir <- here("nhts")
+
+download(url, nhts_zipped, mode="wb") 
+unzip(nhts_zipped, exdir = nhts_dir)
+```
+```{r}
+hnlulu_trips <- here("nhts",
+                     "trippub.csv") %>%
+  read_csv() %>%
+  filter(HHSTATE == "HI" &
+           MSASIZE == "03")
+```
+
+```{r}
+hnlulu_trips <- hnlulu_trips %>%
+  filter(TRPTRANS != "01" & # Walk
+           TRPTRANS != "02" & # Bike
+           TRPTRANS != "19") # Airplane
+```
+
+```{r}
+hnlulu_trips <- hnlulu_trips %>%
+  mutate(home_based = (WHYFROM == "01" |
+                         WHYFROM == "02" |
+                         WHYTO == "01" |
+                         WHYTO == "02"),
+         work = (WHYFROM == "03" |
+           WHYTO == "03")) %>%
+  mutate(purpose = case_when(home_based & work ~ "HBW",
+                             home_based ~ "HBO",
+                             TRUE ~ "NHB"))
+```
+
+```{r}
+table(hnlulu_trips$purpose)
+```
+```{r}
+hh_trip_counts <- hnlulu_trips %>%
+  group_by(HOUSEID) %>%
+  summarise(HBO_trips = sum(purpose == "HBO"),
+            HBW_trips = sum(purpose == "HBW"),
+            NHB_trips = sum(purpose == "NHB"))
+```
+
+```{r}
+hnlulu_hhs <- here("nhts",
+                     "hhpub.csv") %>%
+  read_csv() %>%
+  filter(HHSTATE == "HI" &
+           MSASIZE == "03") %>%
+  left_join(hh_trip_counts) %>%
+  replace_na(list(HBO_trips = 0,
+                  HBW_trips = 0,
+                  NHB_trips = 0))
+```
+```{r}
+#Income
+hnlulu_hhs <- hnlulu_hhs %>%
+  mutate(inc_k = case_when(HHFAMINC == "01" ~ 5,
+                           HHFAMINC == "02" ~ 12.5,
+                           HHFAMINC == "03" ~ 17.5,
+                           HHFAMINC == "04" ~ 20,
+                           HHFAMINC == "05" ~ 37.5,
+                           HHFAMINC == "06" ~ 62.5,
+                           HHFAMINC == "07" ~ 82.5,
+                           HHFAMINC == "08" ~ 112.5,
+                           HHFAMINC == "09" ~ 132.5,
+                           HHFAMINC == "10" ~ 175,
+                           HHFAMINC == "11" ~ 300,
+                           TRUE ~ 99)) %>%
+  mutate(inc_k = na_if(inc_k, 99))
+```
+
+```{r}
+#Population Density of Household Location
+hnlulu_hhs <- hnlulu_hhs %>%
+  mutate(home_popden = case_when(HTPPOPDN == "01" ~ 5,
+                           HTPPOPDN == "-9" ~ 0,
+                           HTPPOPDN == "50" ~ 50,
+                           HTPPOPDN == "300" ~ 300,
+                           HTPPOPDN == "750" ~ 750,
+                           HTPPOPDN == "1500" ~ 1500,
+                           HTPPOPDN == "3000" ~ 3000,
+                           HTPPOPDN == "7000" ~ 7000,
+                           HTPPOPDN == "17000" ~ 17500,
+                           HTPPOPDN == "30000" ~ 35000,
+                           TRUE ~ 99)) %>%
+  mutate(home_popden = na_if(home_popden, 99))
+```
+
+```{r}
+#Ownership
+hnlulu_hhs <- hnlulu_hhs %>%
+  mutate(tenure = case_when(HOMEOWN == "97" ~ "other",
+                            HOMEOWN == "01" ~ "own",
+                            HOMEOWN == "02" ~ "rent",
+                           TRUE ~ "unk")) %>%
+  mutate(tenure = na_if(tenure, "unk"))
+
+
+```
+
+```{r}
+#urban or rural
+hnlulu_hhs <- hnlulu_hhs %>%
+  mutate(urban_rural = case_when(URBRUR == "01" ~ "urban",
+                            URBRUR == "02" ~ "rural",
+                           TRUE ~ "unk")) %>%
+  mutate(urban_rural = na_if(urban_rural, "unk"))
+```
+
+```{r}
+hbo_trip_prod <- lm(HBO_trips ~ log2(inc_k) +
+                                home_popden +
+                                tenure +
+                                urban_rural +
+                                NUMADLT +
+                                HHSIZE	+
+                                HHVEHCNT +
+                                WRKCOUNT,
+                    data = hnlulu_hhs)
+```
+
+```{r}
+summary(hbo_trip_prod)
+```
+
+```{r}
+hbw_trip_prod <- lm(HBW_trips ~ log2(inc_k) +
+                                home_popden +
+                                tenure +
+                                urban_rural +
+                                NUMADLT +
+                                HHSIZE	+
+                                HHVEHCNT +
+                                WRKCOUNT,
+                    data = hnlulu_hhs)
+```
+
+```{r}
+summary(hbw_trip_prod)
+```
+
+```{r}
+nhb_trip_prod <- lm(NHB_trips ~ log2(inc_k) +
+                                home_popden +
+                                tenure +
+                                urban_rural +
+                                NUMADLT +
+                                HHSIZE	+
+                                HHVEHCNT +
+                                WRKCOUNT,
+                    data = hnlulu_hhs)
+```
+
+```{r}
+summary(nhb_trip_prod)
+```
+
+##Loading Zonal Household Data
+
+```{r}
+acs_vars <- load_variables(2021, "acs5")
+```
+
+```{r}
+hh_data <- household[-149,]
+```
+
+
+	
+B19113_001 (median income)
+B25010_001 (average hh size)
+B08201_002 (no vehicles)
+B08201_003 (one vehicle)
+B08202_002 (no workers)
+B08202_003 (one worker)
+B08202_004 (two workers)
+B08202_005 (three or more workers)
+
+```{r}
+varsHI <- c(med_inc = "B19113_001",
+          tot_hhs = "B11005_001",
+          hh_size = "B25010_001",
+          no_cars = "B08201_002",
+          one_car = "B08201_003",
+          no_workers = "B08202_002",
+          one_worker = "B08202_003",
+          two_workers = "B08202_004",
+          three_ormore_workers = "B08202_005")
+
+median_study_area_income <- get_acs(year = 2019,
+                                    geography = "tract",
+                                    county = "Honolulu", state = "HI",
+                                    variables = "B19113_001")
+
+# Load TAZs
+hono_zones <- get_acs(year = 2019, 
+                     state = "HI",
+                     county = "Honolulu",
+                     variables = varsHI,
+                     geography = "tract",
+                     geometry = TRUE,
+                     output = "wide") %>%
+  replace_na(replace = list(med_incE = median_study_area_income$estimate[1]))
+```
+
+```{r}
+hono_zones <- hono_zones %>%
+  mutate(twoplus_cars = tot_hhsE - hhs_0_vehE - hhs_1_vehE) %>%
+  mutate(hbo_prod_per_hh = 0.7199 + 
+                           0.2121 * log2(med_incE) + 
+                           1.4369 * ((hhs_2plus_veh)/tot_hhsE) -
+                           0.2263 * (hhs_0_vehE/tot_hhsE) +
+                           1.7883 * (hhs_with_kidsE/tot_hhsE))
+```
+
+
+
+
